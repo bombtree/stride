@@ -172,7 +172,7 @@ namespace Stride.Navigation
         /// <returns></returns>
         [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, EntryPoint = "xnNavigationCreateNavmesh", CallingConvention = CallingConvention.Cdecl)]
-        public static extern NavMeshHandle CreateNavmesh(float cellTileSize);
+        public static extern NavMeshHandle CreateNavmesh(float cellTileSize, float maxAgentRadius);
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, EntryPoint = "xnNavigationDestroyNavmesh", CallingConvention = CallingConvention.Cdecl)]

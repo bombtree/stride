@@ -30,10 +30,10 @@ extern "C"
 	}
 
 	// Navmesh Query
-	DLL_EXPORT_API void* xnNavigationCreateNavmesh(float cellTileSize)
+	DLL_EXPORT_API void* xnNavigationCreateNavmesh(float cellTileSize, float maxAgentRadius)
 	{
 		NavigationMesh* navmesh = new NavigationMesh();
-		if (!navmesh->Init(cellTileSize))
+		if (!navmesh->Init(cellTileSize, maxAgentRadius))
 		{
 			delete navmesh;
 			navmesh = nullptr;
@@ -54,6 +54,10 @@ extern "C"
 		return navmesh->RemoveTile(tileCoordinate);
 	}
 	DLL_EXPORT_API void xnNavigationPathFindQuery(NavigationMesh* navmesh, NavMeshPathfindQuery query, NavMeshPathfindResult* result)
+	{
+		navmesh->FindPath(query, result);
+	}
+	DLL_EXPORT_API void xnNavigationStraightPathFindQuery(NavigationMesh* navmesh, NavMeshPathfindQuery query, NavMeshPathfindResult* result)
 	{
 		navmesh->FindPath(query, result);
 	}

@@ -123,11 +123,14 @@ namespace Stride.Navigation
             // Check if cache was cleared while building the input
             lastCache = oldNavigationMesh?.Cache;
 
+            float maxAgentRadius = groups.Max(group => group.AgentSettings.Radius);
+
             // The new navigation mesh that will be created
             result.NavigationMesh = new NavigationMesh
             {
                 CellSize = buildSettings.CellSize,
-                TileSize = buildSettings.TileSize
+                TileSize = buildSettings.TileSize,
+                MaxAgentRadius = maxAgentRadius,
             };
 
             // Tile cache for this new navigation mesh

@@ -6,6 +6,7 @@
 #include "../../deps/NativePath/NativePath.h"
 #include "../../deps/NativePath/TINYSTL/vector.h"
 #include "../../../deps/Recast/include/DetourCommon.h"
+#include "../../../deps/Recast/include/DetourCrowd.h"
 #include "Navigation.hpp"
 #include "NavigationMesh.hpp"
 
@@ -34,13 +35,14 @@ NavigationMesh::~NavigationMesh()
 		dtFreeNavMesh(m_navMesh);
 }
 
-bool NavigationMesh::Init(float cellTileSize)
+bool NavigationMesh::Init(float cellTileSize, float maxAgentRadius)
 {
 	// Allocate objects
 	m_navMesh = dtAllocNavMesh();
 	m_navQuery = dtAllocNavMeshQuery();
+	m_crowd = dtAllocCrowd();
 
-	if (!m_navMesh || !m_navQuery)
+	if (!m_navMesh || !m_navQuery || !m_crowd)
 		return false;
 
 	dtNavMeshParams params = { 0 };
@@ -63,6 +65,10 @@ bool NavigationMesh::Init(float cellTileSize)
 
 	// Initialize the query object
 	status = m_navQuery->init(m_navMesh, 2048);
+	if (dtStatusFailed(status))
+		return false;
+	
+	status = m_crowd->init(256, maxAgentRadius, m_navMesh);
 	if (dtStatusFailed(status))
 		return false;
 	return true;

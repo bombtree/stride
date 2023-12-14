@@ -18,11 +18,27 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DetourCrowd\Source\DetourCrowd.cpp" />
+    <ClCompile Include="DetourCrowd\Source\DetourLocalBoundary.cpp" />
+    <ClCompile Include="DetourCrowd\Source\DetourObstacleAvoidance.cpp" />
+    <ClCompile Include="DetourCrowd\Source\DetourPathCorridor.cpp" />
+    <ClCompile Include="DetourCrowd\Source\DetourPathQueue.cpp" />
+    <ClCompile Include="DetourCrowd\Source\DetourProximityGrid.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DetourCrowd\Include\DetourCrowd.h" />
+    <ClInclude Include="DetourCrowd\Include\DetourLocalBoundary.h" />
+    <ClInclude Include="DetourCrowd\Include\DetourObstacleAvoidance.h" />
+    <ClInclude Include="DetourCrowd\Include\DetourPathCorridor.h" />
+    <ClInclude Include="DetourCrowd\Include\DetourPathQueue.h" />
+    <ClInclude Include="DetourCrowd\Include\DetourProximityGrid.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A7A881CE-934A-ACA4-7C05-C0F8684633F5}</ProjectGuid>
+    <ProjectGuid>{1CC0CA0E-7C4D-41E2-9C1F-CB312F93B941}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Recast</RootNamespace>
+    <RootNamespace>DetourCrowd</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -60,34 +76,34 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>lib\x86\</OutDir>
-    <IntDir>obj\$(Platform)\Recast\</IntDir>
-    <TargetName>Recast</TargetName>
+    <IntDir>obj\$(Platform)\DetourCrowd\</IntDir>
+    <TargetName>DetourCrowd</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>lib\x86\</OutDir>
-    <IntDir>obj\$(Platform)\Recast\</IntDir>
-    <TargetName>Recast</TargetName>
+    <IntDir>obj\$(Platform)\DetourCrowd\</IntDir>
+    <TargetName>DetourCrowd</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>lib\x64\</OutDir>
-    <TargetName>Recast</TargetName>
+    <IntDir>obj\$(Platform)\DetourCrowd\</IntDir>
+    <TargetName>DetourCrowd</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IntDir>obj\$(Platform)\Recast\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>lib\x64\</OutDir>
-    <TargetName>Recast</TargetName>
+    <IntDir>obj\$(Platform)\DetourCrowd\</IntDir>
+    <TargetName>DetourCrowd</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IntDir>obj\$(Platform)\Recast\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>DEBUG;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>Recast\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\DetourCrowd\Include;..\..\..\Detour\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <ExceptionHandling>false</ExceptionHandling>
@@ -104,7 +120,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>Recast\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DetourCrowd\Include;Detour\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -124,31 +140,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>Recast\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DetourCrowd\Include;Detour\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>Recast\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>DetourCrowd\Include;Detour\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="Recast\Include\Recast.h" />
-    <ClInclude Include="Recast\Include\RecastAlloc.h" />
-    <ClInclude Include="Recast\Include\RecastAssert.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Recast\Source\Recast.cpp" />
-    <ClCompile Include="Recast\Source\RecastAlloc.cpp" />
-    <ClCompile Include="Recast\Source\RecastArea.cpp" />
-    <ClCompile Include="Recast\Source\RecastContour.cpp" />
-    <ClCompile Include="Recast\Source\RecastFilter.cpp" />
-    <ClCompile Include="Recast\Source\RecastLayers.cpp" />
-    <ClCompile Include="Recast\Source\RecastMesh.cpp" />
-    <ClCompile Include="Recast\Source\RecastMeshDetail.cpp" />
-    <ClCompile Include="Recast\Source\RecastRasterization.cpp" />
-    <ClCompile Include="Recast\Source\RecastRegion.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

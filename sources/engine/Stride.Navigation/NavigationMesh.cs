@@ -25,6 +25,8 @@ namespace Stride.Navigation
         internal float TileSize;
 
         internal float CellSize;
+
+        internal float MaxAgentRadius;
         
         internal Dictionary<Guid, NavigationMeshLayer> LayersInternal = new Dictionary<Guid, NavigationMeshLayer>();
 

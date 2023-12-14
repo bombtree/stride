@@ -20,7 +20,7 @@ namespace Stride.Navigation.Processors
 
         public RecastNavigationMesh(NavigationMesh navigationMesh)
         {
-            navmesh = Navigation.CreateNavmesh(navigationMesh.TileSize * navigationMesh.CellSize);
+            navmesh = Navigation.CreateNavmesh(navigationMesh.TileSize * navigationMesh.CellSize, navigationMesh.MaxAgentRadius);
         }
 
         public void Dispose()

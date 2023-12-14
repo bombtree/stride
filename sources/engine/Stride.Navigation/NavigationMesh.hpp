@@ -4,6 +4,7 @@
 #pragma once
 #include "../../../deps/Recast/include/DetourNavMesh.h"
 #include "../../../deps/Recast/include/DetourNavMeshQuery.h"
+#include "../../../deps/Recast/include/DetourCrowd.h"
 #include "../../deps/NativePath/TINYSTL/unordered_set.h"
 
 #pragma pack(push, 4)
@@ -41,11 +42,12 @@ class NavigationMesh
 private:
 	dtNavMesh* m_navMesh = nullptr;
 	dtNavMeshQuery* m_navQuery = nullptr;
+	dtCrowd* m_crowd = nullptr;
 	tinystl::unordered_set<dtTileRef> m_tileRefs;
 public:
 	NavigationMesh();
 	~NavigationMesh();
-	bool Init(float cellTileSize);
+	bool Init(float cellTileSize, float maxAgentRadius);
 	bool LoadTile(uint8_t* navData, int navDataLength);
 	bool RemoveTile(Point tileCoordinate);
 	void FindPath(NavMeshPathfindQuery query, NavMeshPathfindResult* result);
