@@ -448,6 +448,9 @@ public partial class ShaderMethod(
             }
         }
 
+        if (!IsOverride)
+            CheckMissingOverride(table, ftype);
+
         var symbol = new Symbol(new(Name, SymbolKind.Method, IsStage: IsStaged), ftype, function.Id, MemberAccessWithImplicitThis: ftype, OwnerType: table.CurrentShader);
 
         if (firstDefaultParameter != -1)
@@ -469,6 +472,26 @@ public partial class ShaderMethod(
 
         SymbolFrame = table.Pop();
         table.CurrentShader!.Methods.Add((symbol, functionFlags));
+    }
+
+    // Without 'override', a method with the signature of an inherited one starts a separate method group,
+    // so calls through the base never reach it. The mixer only logs the error message, so it carries the location.
+    private void CheckMissingOverride(SymbolTable table, FunctionType ftype)
+    {
+        foreach (var inheritedShader in table.InheritedShaders)
+        {
+            var inherited = inheritedShader.Symbol!;
+            foreach (var (method, flags) in inherited.Methods)
+            {
+                if (method.Id.Name != Name.Name || method.Type is not FunctionType methodType || methodType != ftype)
+                    continue;
+
+                var message = (flags & Specification.FunctionFlagsMask.Abstract) != 0 ? SDSLErrorMessages.SDSL0114 : SDSLErrorMessages.SDSL0115;
+                var parameters = string.Join(", ", Parameters.Select(p => p.Type));
+                table.AddError(new(Name.Info, string.Format(message, table.CurrentShader!.Name, Name.Name, parameters, Name.Info.Line, inherited.Name)));
+                return;
+            }
+        }
     }
 
     // SPIR-V spec: SpacingX / VertexOrderX / PointMode execution modes are only valid on
@@ -509,6 +532,15 @@ public partial class ShaderMethod(
     {
         var (builder, context) = compiler;
 
+        // Note: these values end up as literals of OpExecutionMode
+        int EvaluateAttributeParameter(AnyShaderAttribute attribute, int index)
+        {
+            var parameter = attribute.Parameters[index];
+            if (!parameter.TryEvaluateConstantInteger(table, context, out var value))
+                table.AddError(new(parameter.Info, $"[{attribute.Name}] parameter must be a constant integer expression"));
+            return value;
+        }
+
         if (Attributes != null)
         {
             Span<int> attrParamBuffer = stackalloc int[8]; // max attribute parameters
@@ -527,32 +559,18 @@ public partial class ShaderMethod(
                         {
                             var parameters = attrParamBuffer[..anyAttribute.Parameters.Count];
                             for (var index = 0; index < anyAttribute.Parameters.Count; index++)
-                            {
-                                var compiled = anyAttribute.Parameters[index].CompileConstantValue(table, context);
-                                var expr = ConstantExpression.ParseFromBuffer(compiled.Id, context.GetBuffer(), context);
-                                if (!expr.TryEvaluate(out var value) || value is null)
-                                    throw new InvalidOperationException();
-                                parameters[index] = Convert.ToInt32(value);
-                            }
+                                parameters[index] = EvaluateAttributeParameter(anyAttribute, index);
 
                             context.Add(new OpExecutionMode(function.Id, Specification.ExecutionMode.LocalSize, new(parameters)));
                         }
                     }
                     else if (anyAttribute.Name == "maxvertexcount")
                     {
-                        var compiled = anyAttribute.Parameters[0].CompileConstantValue(table, context);
-                        var expr = ConstantExpression.ParseFromBuffer(compiled.Id, context.GetBuffer(), context);
-                        if (!expr.TryEvaluate(out var value) || value is null)
-                            throw new InvalidOperationException();
-                        context.Add(new OpExecutionMode(function.Id, Specification.ExecutionMode.OutputVertices, new(Convert.ToInt32(value))));
+                        context.Add(new OpExecutionMode(function.Id, Specification.ExecutionMode.OutputVertices, new(EvaluateAttributeParameter(anyAttribute, 0))));
                     }
                     else if (anyAttribute.Name == "outputcontrolpoints")
                     {
-                        var compiled = anyAttribute.Parameters[0].CompileConstantValue(table, context);
-                        var expr = ConstantExpression.ParseFromBuffer(compiled.Id, context.GetBuffer(), context);
-                        if (!expr.TryEvaluate(out var value) || value is null)
-                            throw new InvalidOperationException();
-                        context.Add(new OpExecutionMode(function.Id, Specification.ExecutionMode.OutputVertices, new(Convert.ToInt32(value))));
+                        context.Add(new OpExecutionMode(function.Id, Specification.ExecutionMode.OutputVertices, new(EvaluateAttributeParameter(anyAttribute, 0))));
                     }
                     else if (anyAttribute.Name == "patchconstantfunc")
                     {

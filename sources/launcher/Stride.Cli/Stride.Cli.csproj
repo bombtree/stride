@@ -11,7 +11,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>stride</ToolCommandName>
     <PackageId>Stride.Cli</PackageId>
-    <VersionPrefix>1.0.2</VersionPrefix>
+    <VersionPrefix>1.0.3</VersionPrefix>
     <Description>Command-line tool for Stride: install Stride versions and create, build, and manage Stride projects.</Description>
     <PackageTags>stride;gamedev;cli;dotnet-tool</PackageTags>
   </PropertyGroup>
@@ -31,6 +31,7 @@
   <ItemGroup>
     <Compile Include="..\..\shared\Stride.NuGetResolver\GraphicsApiSelector.cs" Link="Legacy\Shared\GraphicsApiSelector.cs" />
     <Compile Include="..\..\shared\Stride.NuGetResolver\DotNetHostSelector.cs" Link="Legacy\Shared\DotNetHostSelector.cs" />
+    <Compile Include="..\..\shared\Stride.NuGetResolver\ProjectVersionReader.cs" Link="Legacy\Shared\ProjectVersionReader.cs" />
     <Compile Include="..\..\shared\Stride.NuGetResolver\RestoreHelper.cs" Link="Legacy\Shared\RestoreHelper.cs" />
     <Compile Include="..\..\shared\LoaderToolLocator\LoaderToolLocator.cs" Link="Legacy\Shared\LoaderToolLocator.cs" />
   </ItemGroup>

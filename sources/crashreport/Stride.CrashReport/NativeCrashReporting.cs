@@ -22,7 +22,8 @@ namespace Stride.CrashReport
         private static bool installed;
 
         /// <summary>
-        /// Arms native-crash capture for <paramref name="applicationName"/> (e.g. "GameStudio", "Launcher", "Cli").
+        /// Arms native-crash capture for <paramref name="applicationName"/> (e.g. "GameStudio"). The host must ship
+        /// libstridecrash and a reporter (the Launcher and the CLI don't, so they don't call it).
         /// Safe to call once at startup; later calls are ignored. Off-Windows, under NativeAOT, or when
         /// STRIDE_CRASH_MODE=off, it does nothing.
         /// </summary>
@@ -270,33 +271,16 @@ namespace Stride.CrashReport
             return dll;
         }
 
-        // In a real install the reporter is delivered as the Stride.CrashReporter package, its publish tree under
-        // tools/. Probe the NuGet global store directly (no NuGet assemblies pulled into this minimal library) and
-        // take the newest installed version. Best-effort: any failure just means "no reporter", handled by callers.
+        // In a real install the reporter is the Stride.CrashReporter package in the NuGet global store, its publish
+        // tree under tools/. Only the version this library was built for (CrashReporterVersion, baked by the csproj)
+        // is launched: Game Studio and the asset compiler depend on exactly that one. Probes the store directly, no
+        // NuGet assemblies in this minimal library. Best-effort: any failure just means "no reporter".
         private static string FindReporterInStore()
         {
             try
             {
-                var globalPackages = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-                if (string.IsNullOrEmpty(globalPackages))
-                {
-                    var home = Environment.GetEnvironmentVariable("USERPROFILE") ?? Environment.GetEnvironmentVariable("HOME");
-                    if (string.IsNullOrEmpty(home))
-                        return null;
-                    globalPackages = Path.Combine(home, ".nuget", "packages");
-                }
-
-                var packageRoot = Path.Combine(globalPackages, "stride.crashreporter");
-                if (!Directory.Exists(packageRoot))
-                    return null;
-
-                foreach (var versionDirectory in Directory.GetDirectories(packageRoot).OrderByDescending(ParseVersion))
-                {
-                    var tools = Path.Combine(versionDirectory, "tools");
-                    var reporter = Directory.Exists(tools) ? FindReporterIn(tools) : null;
-                    if (reporter != null)
-                        return reporter;
-                }
+                var globalPackages = GlobalPackagesFolder();
+                return globalPackages != null ? FindReporterInStore(globalPackages, ReporterVersion) : null;
             }
             catch
             {
@@ -305,11 +289,43 @@ namespace Stride.CrashReport
             return null;
         }
 
-        private static Version ParseVersion(string versionDirectory)
+        /// <summary>
+        /// The NuGet global packages folder: the one the host's own restore used when Stride.NuGetResolver set
+        /// STRIDE_NUGET_PACKAGES at startup (NuGet config honoured), else NUGET_PACKAGES, else NuGet's default.
+        /// </summary>
+        public static string GlobalPackagesFolder()
         {
-            var name = Path.GetFileName(versionDirectory);
-            var release = name.Split('-', '+')[0]; // drop the prerelease/build suffix; a coarse ordering is enough
-            return Version.TryParse(release, out var version) ? version : new Version(0, 0);
+            var folder = Environment.GetEnvironmentVariable("STRIDE_NUGET_PACKAGES");
+            if (string.IsNullOrEmpty(folder))
+                folder = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+            if (string.IsNullOrEmpty(folder))
+            {
+                var home = Environment.GetEnvironmentVariable("USERPROFILE") ?? Environment.GetEnvironmentVariable("HOME");
+                if (string.IsNullOrEmpty(home))
+                    return null;
+                folder = Path.Combine(home, ".nuget", "packages");
+            }
+            return folder;
         }
+
+        /// <summary>
+        /// The reporter of exactly <paramref name="version"/> in the NuGet global store at <paramref name="globalPackages"/>, or null.
+        /// </summary>
+        public static string FindReporterInStore(string globalPackages, string version)
+        {
+            if (string.IsNullOrEmpty(version))
+                return null;
+            // NuGet lower-cases the id and the version in the store paths.
+            var tools = Path.Combine(globalPackages, "stride.crashreporter", version.ToLowerInvariant(), "tools");
+            return Directory.Exists(tools) ? FindReporterIn(tools) : null;
+        }
+
+        /// <summary>
+        /// The Stride.CrashReporter package version this library was built for (empty when built outside the
+        /// Stride SDK, where nothing bakes it).
+        /// </summary>
+        public static string ReporterVersion
+            => typeof(NativeCrashReporting).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                .FirstOrDefault(x => x.Key == "CrashReporterVersion")?.Value;
     }
 }

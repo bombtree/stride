@@ -173,10 +173,10 @@ namespace Stride.Graphics
                     NativeAccessMask = VkAccessFlags.TransferRead;
 
                 if (NativeLayout == VkImageLayout.ColorAttachmentOptimal)
-                    NativeAccessMask = VkAccessFlags.ColorAttachmentWrite;
+                    NativeAccessMask = VkAccessFlags.ColorAttachmentWrite | VkAccessFlags.ColorAttachmentRead;
 
                 if (NativeLayout == VkImageLayout.DepthStencilAttachmentOptimal)
-                    NativeAccessMask = VkAccessFlags.DepthStencilAttachmentWrite;
+                    NativeAccessMask = VkAccessFlags.DepthStencilAttachmentWrite | VkAccessFlags.DepthStencilAttachmentRead;
 
                 if (NativeLayout == VkImageLayout.ShaderReadOnlyOptimal)
                     NativeAccessMask = VkAccessFlags.ShaderRead | VkAccessFlags.InputAttachmentRead;
@@ -184,7 +184,7 @@ namespace Stride.Graphics
                 NativePipelineStageMask =
                     IsRenderTarget ? VkPipelineStageFlags.ColorAttachmentOutput :
                     IsDepthStencil ? VkPipelineStageFlags.ColorAttachmentOutput | VkPipelineStageFlags.EarlyFragmentTests | VkPipelineStageFlags.LateFragmentTests :
-                    IsShaderResource || IsUnorderedAccess ? VkPipelineStageFlags.VertexInput | VkPipelineStageFlags.FragmentShader | VkPipelineStageFlags.ComputeShader :
+                    IsShaderResource || IsUnorderedAccess ? VkPipelineStageFlags.VertexShader | VkPipelineStageFlags.FragmentShader | VkPipelineStageFlags.ComputeShader :
                     VkPipelineStageFlags.None;
 
                 if (ParentTexture != null)
@@ -477,29 +477,6 @@ namespace Stride.Graphics
         }
 
         partial void ReleaseImportedImageResources();
-
-        /// <summary>
-        ///   Perform Vulkan-specific recreation of the Texture.
-        /// </summary>
-        private partial void OnRecreateImpl()
-        {
-            // Dependency: wait for underlying texture to be recreated
-            if (ParentTexture != null && ParentTexture.LifetimeState != GraphicsResourceLifetimeState.Active)
-                return;
-
-            // Render Target / Depth Stencil are considered as "dynamic"
-            if ((Usage == GraphicsResourceUsage.Immutable
-                    || Usage == GraphicsResourceUsage.Default)
-                && !IsRenderTarget && !IsDepthStencil)
-                return;
-
-            if (ParentTexture == null && GraphicsDevice != null)
-            {
-                GraphicsDevice.RegisterTextureMemoryUsage(-SizeInBytes);
-            }
-
-            InitializeFromImpl();
-        }
 
         private unsafe VkImageView GetImageView(ViewType viewType, int arrayOrDepthSlice, int mipIndex)
         {
