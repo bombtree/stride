@@ -426,12 +426,19 @@ namespace Stride.Graphics
             Draw(texture, in elementInfo);
         }
 
-        internal void DrawString([NotNull] SpriteFont font, [NotNull] string text, ref SpriteFont.InternalUIDrawCommand drawCommand)
+        internal void DrawString([NotNull] SpriteFont font, [NotNull] string text, ref SpriteFont.InternalUIDrawCommand drawCommand, int length = -1)
         {
             if (font == null) throw new ArgumentNullException(nameof(font));
             if (text == null) throw new ArgumentNullException(nameof(text));
-
-            var proxy = new SpriteFont.StringProxy(text);
+            SpriteFont.StringProxy proxy;
+            if(length < 0)
+            {
+                proxy = new SpriteFont.StringProxy(text);
+            }
+            else
+            {
+                proxy = new SpriteFont.StringProxy(text, length);
+            }
 
             // shift the string position so that it is written from the left/top corner of the element
             var leftTopCornerOffset = drawCommand.TextBoxSize / 2;

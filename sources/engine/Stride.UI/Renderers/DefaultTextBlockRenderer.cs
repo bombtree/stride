@@ -66,14 +66,14 @@ namespace Stride.UI.Renderers
                         borderDrawCommand.Color = borderColor;
                         borderDrawCommand.Matrix = drawCommand.Matrix * Matrix.Translation(offsetX, offsetY, 0);
 
-                        Batch.DrawString(textBlock.Font, textBlock.TextToDisplay, ref borderDrawCommand);
+                        Batch.DrawString(textBlock.Font, textBlock.TextToDisplay, ref borderDrawCommand, int.Min(textBlock.TextToDisplay.Length, textBlock.MaxCharactersToDisplay));
                     }
                 }
 
                 drawCommand.DepthBias += 1;
             }
 
-            Batch.DrawString(textBlock.Font, textBlock.TextToDisplay, ref drawCommand);
+            Batch.DrawString(textBlock.Font, textBlock.TextToDisplay, ref drawCommand, int.Min(textBlock.TextToDisplay.Length, textBlock.MaxCharactersToDisplay));
 
             if (textBlock.Font.FontType == SpriteFontType.SDF)
             {

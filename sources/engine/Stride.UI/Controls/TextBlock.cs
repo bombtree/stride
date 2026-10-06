@@ -134,6 +134,20 @@ namespace Stride.UI.Controls
         public TextAlignment TextAlignment { get; set; }
 
         /// <summary>
+        /// The number of characters to display.
+        /// </summary>
+        [DefaultValue(int.MaxValue)]
+        public int MaxCharactersToDisplay 
+        { 
+            get => maxCharactersToDisplay;
+            set
+            {
+                maxCharactersToDisplay = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the value indicating if the <see cref="Text"/> of the <see cref="TextBlock"/> 
         /// should automatically return to the beginning of the line when it is too long for the line width.
         /// </summary>
@@ -150,9 +164,13 @@ namespace Stride.UI.Controls
                     return;
 
                 wrapText = value;
+                didWrapText = false;
                 InvalidateMeasure();
             }
         }
+
+        private bool didWrapText;
+        private int maxCharactersToDisplay;
 
         /// <summary>
         /// Gets or sets the value indicating if the snapping of the <see cref="Text"/> of the <see cref="TextBlock"/> to the closest screen pixel should be skipped.
@@ -205,7 +223,7 @@ namespace Stride.UI.Controls
         /// <inheritdoc/>
         protected override Vector3 ArrangeOverride(Vector3 finalSizeWithoutMargins)
         {
-            if (WrapText)
+            if (WrapText && !didWrapText)
                 UpdateWrappedText(finalSizeWithoutMargins);
 
             return base.ArrangeOverride(finalSizeWithoutMargins);
@@ -221,13 +239,13 @@ namespace Stride.UI.Controls
             if (textToMeasure == null)
                 return Vector2.Zero;
 
-            return CalculateTextSize(new SpriteFont.StringProxy(textToMeasure));
+            return CalculateTextSize(new SpriteFont.StringProxy(textToMeasure, int.Min(textToMeasure.Length, MaxCharactersToDisplay)));
         }
 
         /// <inheritdoc/>
         protected override Vector3 MeasureOverride(Vector3 availableSizeWithoutMargins)
         {
-            if (WrapText)
+            if (WrapText && !didWrapText)
                 UpdateWrappedText(availableSizeWithoutMargins);
 
             return new Vector3(CalculateTextSize(), 0);
@@ -244,7 +262,7 @@ namespace Stride.UI.Controls
 
         private Vector2 CalculateTextSize(StringBuilder textToMeasure)
         {
-            return CalculateTextSize(new SpriteFont.StringProxy(textToMeasure));
+            return CalculateTextSize(new SpriteFont.StringProxy(textToMeasure, int.Min(textToMeasure.Length, MaxCharactersToDisplay)));
         }
 
         private Vector2 CalculateTextSize(SpriteFont.StringProxy textToMeasure)
@@ -254,7 +272,8 @@ namespace Stride.UI.Controls
 
             var sizeRatio = LayoutingContext.RealVirtualResolutionRatio;
             var measureFontSize = new Vector2(sizeRatio.Y * ActualTextSize); // we don't want letters non-uniform ratio
-            var realSize = Font.MeasureString(textToMeasure, measureFontSize);
+            Vector2 realSize;
+            realSize = Font.MeasureString(textToMeasure, measureFontSize);
 
             // force pre-generation if synchronous generation is required
             if (SynchronousCharacterGeneration)
@@ -300,7 +319,8 @@ namespace Stride.UI.Controls
 
                 while (true)
                 {
-                    lineCurrentSize = CalculateTextSize(currentLine).X;
+                    
+                    lineCurrentSize = CalculateTextSize(new SpriteFont.StringProxy(currentLine, currentLine.Length)).X;
 
                     if (lineCurrentSize > availableWidth || indexOfNewLine + indexNextCharacter >= text.Length)
                         break;
@@ -361,6 +381,7 @@ namespace Stride.UI.Controls
             }
 
             wrappedText = currentText.ToString();
+            didWrapText = true;
         }
     }
 }
